@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.11.0  # Последняя стабильная версия
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true  # Отключаем security для теста
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"  # Выделяем 1GB памяти
+    volumes:
+      - os_data:/usr/share/opensearch/data
+    ports:
+      - "9200:9200"
+      - "9600:9600"  # Порты OpenSearch
+    networks:
+      - elastic-net
+
+  cerebro:
+    image: lmenezes/cerebro:0.9.4
+    container_name: cerebro
+    ports:
+      - "9000:9000"
+    environment:
+      - CEREBRO_SECRET=mysecretkey
+    depends_on:
+      - opensearch
+    networks:
+      - elastic-net
+
+volumes:
+  os_data:
+
+networks:
+  elastic-net:
+    driver: bridge
