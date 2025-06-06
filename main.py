@@ -56,17 +56,42 @@ print(client.search(index="text_index_2", body={"query": {"match_all": {}}}))
 # Создание индекса с strict-маппингом
 def create_index(index_name):
     mapping = {
+        "settings": {
+            "analysis": {
+                "filter": {
+                    "russian_stop": {
+                        "type": "stop",
+                        "stopwords": "_russian_"
+                    },
+                    "russian_stemmer": {
+                        "type": "stemmer",
+                        "language": "russian"
+                    }
+                },
+                "analyzer": {
+                    "russian": {
+                        "tokenizer": "standard",
+                        "filter": [
+                            "lowercase",
+                            "russian_stop",
+                            "russian_stemmer"
+                        ]
+                    }
+                }
+            }
+        },
         "mappings": {
-            "dynamic": "strict",  # Запрет неописанных полей
+            "dynamic": "strict",
             "properties": {
                 "text": {
                     "type": "text",
+                    "analyzer": "russian",
                     "fields": {
                         "keyword": {"type": "keyword", "ignore_above": 256}
                     }
                 },
                 "created_at": {"type": "date"}
-            },
+            }
         }
     }
 
